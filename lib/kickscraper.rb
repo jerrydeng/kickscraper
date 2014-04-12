@@ -14,6 +14,10 @@ module Kickscraper
   attr_accessor :client
 
   def self.client
-    @client = Kickscraper::Client.new
+    if Kickscraper.token.nil?
+      @client = Kickscraper::Client.new
+    else
+      @client ||= Kickscraper::Client.new
+    end    
   end
 end
