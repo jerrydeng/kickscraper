@@ -16,4 +16,8 @@ module Kickscraper
   def self.client
     @client ||= Kickscraper::Client.new
   end
+
+  def self.reload
+    @client = nil
+  end  
 end
