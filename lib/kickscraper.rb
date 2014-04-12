@@ -14,10 +14,6 @@ module Kickscraper
   attr_accessor :client
 
   def self.client
-    @client ||= Kickscraper::Client.new
+    @client = Kickscraper::Client.new
   end
-
-  def self.reload
-    @client = nil
-  end  
 end
