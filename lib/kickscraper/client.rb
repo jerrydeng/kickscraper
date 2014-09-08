@@ -4,10 +4,11 @@ module Kickscraper
     class Client
         include Connection
         
-        attr_accessor :user
+        attr_accessor :user, :more_user_projects_url
         
         def initialize
             @more_projects_available = false
+            @more_user_projects_url = nil
 
             if Kickscraper.email.nil?
                 @user = nil
@@ -116,8 +117,7 @@ module Kickscraper
             # define what we should return as an empty response, based on the expected type
             types_that_should_return_an_array = ["projects", "comments", "updates", "categories"]
             empty_response = (types_that_should_return_an_array.include? expected_type) ? [] : nil
-            
-            
+
             # get the body from the response
             body = response.body
 
@@ -156,11 +156,12 @@ module Kickscraper
                     
                 # else, determine if we can load more projects and then return an array of projects
                 else
-                    
                     if @last_api_call_params && !body.total_hits.nil?
                         @more_projects_available = @last_api_call_params[:page] * 20 < body.total_hits # (there is a huge assumption here that Kickstarter will always return 20 projects per page!)
                     end
-                    
+                    if body.urls && body.urls.api && body.urls.api.more_projects
+                        @more_user_projects_url = body.urls.api.more_projects
+                    end
                     return body.projects.map { |project| Project.coerce project }
                 end
                 

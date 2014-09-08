@@ -18,7 +18,13 @@ module Kickscraper
 
         def backed_projects
         	return [] unless self.urls.api.backed_projects
-            @backed_projects ||= Kickscraper.client.process_api_url("Projects", self.urls.api.backed_projects)
+            if @backed_projects
+                return @backed_projects 
+            else
+                projects = Kickscraper.client.process_api_url("Projects", self.urls.api.backed_projects)
+                projects = load_more_backed_projects(projects)
+                return @backed_projects ||= projects
+            end
         end
 
         def starred_projects
@@ -29,6 +35,21 @@ module Kickscraper
         def created_projects
             return [] unless self.urls.api.created_projects
             @created_projects ||= Kickscraper.client.process_api_url("Projects", self.urls.api.created_projects)
+        end
+
+        def load_more_backed_projects(projects = [])
+            more_url = Kickscraper.client.more_user_projects_url
+            if more_url
+                more_projects = Kickscraper.client.process_api_url("Projects", Kickscraper.client.more_user_projects_url)
+                if more_projects.empty?                    
+                    Kickscraper.client.more_user_projects_url = nil
+                    return projects
+                else
+                    return load_more_backed_projects(projects + more_projects)
+                end
+            else
+                return projects
+            end
         end
     end
 end
